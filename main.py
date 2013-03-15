@@ -9,7 +9,6 @@ if __name__ == "__main__":
     txt = open("./testfiles/abstract.c").read()
 
     s = CodeSoup(txt)
-    s.parse()
     print 'comment line = %r' % s.comments_line_count
     print 'blank line = %r' % s.blank_line_count
     clean_txt = s.clean

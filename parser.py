@@ -15,6 +15,15 @@ EMPTY_SET = set([' ', '\t', '\n', '\v', '\f', '\r'])  # empty char set
 
 
 class CodeSoup(object):
+    '''
+    Only support C code. remove comments and blank lines
+    usuage:
+        >>> txt = open('xxx.c')
+        >>> soup = CodeSoup(txt)
+        >>> soup.blank_line_count
+        >>> soup.comments_line_count
+        >>> soup.clean
+    '''
 
     #  status
     CODE = 1  # normal code
@@ -92,6 +101,7 @@ class CodeSoup(object):
             self.STR_DOUBLE_2: self.on_str_double_2,
             self.STR_DOUBLE_3: self.on_str_double_3,
         }
+        self.parse()
 
     def parse(self):
         self.index = 0
@@ -350,7 +360,6 @@ class CodeSoup(object):
 if __name__ == "__main__":
     txt = open("./testfiles/simple.c").read()
     soup = CodeSoup(txt)
-    soup.parse()
     print txt,
     print '*' * 20
     print soup.clean
