@@ -1,8 +1,15 @@
 #!/usr/bin/env python
 #encoding=utf-8
-
-import os
+'''
+TODOs:
+    1 . compatible on windows and linux
+    2 . command line args
+    3 . encoding transform
+    4 . others
+    '''
 import sys
+
+__all__ = ['CodeSoup', 'EMPTY_SET']
 
 EMPTY_SET = set([' ', '\t', '\n', '\v', '\f', '\r'])  # empty char set
 
@@ -47,6 +54,8 @@ class CodeSoup(object):
 
         self.clean_code = []  # no comments, will be joined with ''
         self.comments_line_count = 0
+        self.blank_line_count = 0
+        self.after_star_comment = False  # a star comment ended, this set True
 
         self.length = len(self.raw)
         self.max_index = self.length - 1
@@ -87,24 +96,24 @@ class CodeSoup(object):
     def parse(self):
         self.index = 0
         self.line_no = 0
-        print 'max_index = %r' % self.max_index
+        # print 'max_index = %r' % self.max_index
         while self.status != self.END:
             if self.index <= self.max_index:
                 self.c = self.raw[self.index]
 
-                print 'index = %r, self.c = %r, self.status = %r' % (
-                    self.index, self.c, self.status)
+                # print 'index = %r, self.c = %r, self.status = %r' % (
+                #    self.index, self.c, self.status)
                 method = self.method_map[self.status]
                 method()
             else:
-                print 'index = %r, self.c = %r, self.status = %r' % (
-                    self.index, self.c, self.status)
+                #print 'index = %r, self.c = %r, self.status = %r' % (
+                #    self.index, self.c, self.status)
                 method = self.method_map[self.status]
                 method()
                 self.status = self.END
                 self.on_end()
 
-        print 'begin joining'
+        #print 'begin joining'
         self.clean = ''.join(self.clean_code).rstrip()
 
     def on_begin(self):
@@ -119,20 +128,20 @@ class CodeSoup(object):
 
     def on_error(self, pos=None, hint='no hints'):
         pos = pos or self.index
-        print 'ERROR!, around:\n-----\n ...%s...\n-----' %\
-            self.raw[max(pos-10, 0):min(pos+10, self.max_index)]
-        print 'hint: %s' % hint
+        #print 'ERROR!, around:\n-----\n ...%s...\n-----' %\
+        #    self.raw[max(pos-10, 0):min(pos+10, self.max_index)]
+        #print 'hint: %s' % hint
         sys.exit(1)
 
     def on_code(self):
-        print ' - on_code, called',
+        #print ' - on_code, called',
         c = self.c
         if c in ['\n']:
             line = self.raw[self.line_begin_index:self.index]
             line_set = set(line)
             diff = line_set - EMPTY_SET
             if diff:
-                print 'line = "%s"' % line
+                #print 'line = "%s"' % line
                 self.clean_code.append(line)
                 self.clean_code.append('\n')
                 self.index += 1
@@ -142,7 +151,11 @@ class CodeSoup(object):
 
                 self.onLineEnd()
             else:
-                print 'EMPTY'
+                if self.after_star_comment:
+                    self.after_star_comment = False
+                else:
+                    self.blank_line_count += 1
+                #print 'EMPTY'
                 self.index += 1
                 self.line_begin_index = self.index
         else:
@@ -210,7 +223,8 @@ class CodeSoup(object):
             self.clean_code.append(line)
             self.clean_code.append('\n')
         else:
-            print 'EMPTY'
+            pass
+            #print 'EMPTY'
 
         self.comments_line_count += 1  # line comment finished
 
@@ -266,7 +280,7 @@ class CodeSoup(object):
     def on_str_double_2(self):
         c = self.c
         if c == '"':  # "
-            print 'index = %r, double quote end' % self.index
+            #print 'index = %r, double quote end' % self.index
             self.status = self.CODE
             self.index += 1
         elif c == "\\":  # \
@@ -317,6 +331,7 @@ class CodeSoup(object):
             self.index += 1
 
     def on_comment_star_5(self):
+        self.after_star_comment = True
         self.line_begin_index = self.index
         self.comments_line_count += 1
         self.c = self.raw[self.index]
@@ -333,12 +348,14 @@ class CodeSoup(object):
 
 
 if __name__ == "__main__":
-    txt = open("testfile.c").read()
+    txt = open("./testfiles/simple.c").read()
     soup = CodeSoup(txt)
     soup.parse()
+    print txt,
     print '*' * 20
     print soup.clean
     print '*' * 20
     print 'soup.clean = %r' % soup.clean
     print 'totally comment lines = %r' % soup.comments_line_count
+    print 'total black lindes = %r' % soup.blank_line_count
     pass
