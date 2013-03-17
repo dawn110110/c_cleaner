@@ -1,0 +1,6 @@
+total	code	cmts	blank	filename
+3113	2474	276	364	testfiles_clean/subdir/abstract.c
+3044	2435	234	376	testfiles_clean/bytearrayobject.c
+17	5	10	2	testfiles_clean/simple.c
+867	697	67	103	testfiles_clean/bufferobject.c
+202	93	83	27	testfiles_clean/subdir/boolobject.c

@@ -63,7 +63,8 @@ def main():
                     (statistics[k][0], statistics[k][1],
                      statistics[k][2], statistics[k][3], k))
 
-    print 'work finished!'
+    print 'finished!'
+    print 'see:  ' + dst + os.sep + 'comment_statistics.txt'
 
 
 if __name__ == "__main__":
